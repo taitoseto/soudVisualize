@@ -13,6 +13,5 @@
             MyCanvas,
     },
     })
-    
     export default class WaveForm extends Vue {}
 </script>
