@@ -33,7 +33,7 @@
         canvasCtx: CanvasRenderingContext2D | null = null;
         constraints = {audio: true};
         frameCount = 0;    
-        color = 'black';
+        color = 'rgb(0, 0, 0)';
         fontsize = 80;
     
 
@@ -41,12 +41,10 @@
           // mounted 以降で canvas の DOM にアクセスできる
           this.getMicStream();
           this.visualize();
-          this.fillIcon();
-          //this.waveform();
         }
         async getMicStream(){
             //this.analyser= this.audioCtx.createAnalyser();
-            this.analyser.minDecibels = -60;
+            this.analyser.minDecibels = -0;
             this.analyser.maxDecibels = -10;
             this.analyser.smoothingTimeConstant = 0.9;
             const audioCtx = this.audioCtx;
@@ -86,9 +84,7 @@
         }
         async onClick(){
             window.cancelAnimationFrame(this.frameCount);
-            this.visualize();
-            this.fillIcon();
-            //this.waveform();           
+            this.visualize();         
         }
         //周波数ごとのデータから取得
         visualize() {
@@ -123,71 +119,6 @@
                           
             this.canvasCtx.fillStyle ='rgb(0,100,0)';
             this.canvasCtx.fillRect(0,HEIGHT - HEIGHT * percent, WIDTH, HEIGHT * percent);
-            const peak = 0.8; 
-            if(percent > peak){
-                this.canvasCtx.fillStyle ='rgb(100,0,0)';
-                this.canvasCtx.fillRect(0,HEIGHT - HEIGHT * percent, WIDTH, HEIGHT * (percent - peak)); 
-            }
-        }
-
-        fillIcon() {
-            
-            this.frameCount = requestAnimationFrame(this.fillIcon);
-            this.analyser.fftSize = 32;
-            const bufferLengthAlt = this.analyser.frequencyBinCount;
-            const dataArrayAlt = new Uint8Array(bufferLengthAlt);
-            this.analyser.getByteFrequencyData(dataArrayAlt);
-            const lowest = 0.01;
-            let max = lowest;
-            for (const f of dataArrayAlt) {
-                max = Math.max(max, f / 256);
-            }
-            //const normalized = (Math.log(lowest) - Math.log(max)) / Math.log(lowest);
-            const percent = Math.min(Math.max(max, 0), 1);              
-            if(percent < 0.3){
-                this.color = 'black';
-            }else if(percent < 0.8){
-                this.color = 'green';
-            }else{
-                this.color = 'red';
-            }
-            //console.log(percent);
-        }
-        
-        //波形から取得
-        waveform() {
-            this.canvas = document.getElementById('waveform') as HTMLCanvasElement;
-            this.canvasCtx = this.canvas.getContext('2d');
-            const WIDTH = this.canvas.width;
-            const HEIGHT = this.canvas.height;
-           
-
-            if (!(this.canvasCtx instanceof CanvasRenderingContext2D)) {
-                throw new Error("#canvasCtx is not an CanvasRenderingContext2D");
-            }
-            this.frameCount = requestAnimationFrame(this.waveform);
-            this.analyser.fftSize = 32;
-            const bufferLength = this.analyser.fftSize;
-
-            const dataArray = new Uint8Array(bufferLength);
-
-            this.analyser.getByteTimeDomainData(dataArray);
-
-            this.canvasCtx.fillStyle = 'rgb(0, 0, 0)';
-            this.canvasCtx.fillRect(0, 0, WIDTH, HEIGHT);
-            
-            const barWidth = WIDTH;
-            
-            const lowest = 0.01;
-            let max = lowest;
-            for (const f of dataArray) {
-                max = Math.max(max, (f - 128) / 128);
-            }
-            const normalized = (Math.log(lowest) - Math.log(max)) / Math.log(lowest);
-            const percent = Math.min(Math.max(normalized, 0), 1);
-
-            this.canvasCtx.fillStyle = 'rgb(100, 0, 0)';
-            this.canvasCtx.fillRect(0,HEIGHT - HEIGHT * percent,barWidth, HEIGHT * percent);
             const peak = 0.8; 
             if(percent > peak){
                 this.canvasCtx.fillStyle ='rgb(100,0,0)';
