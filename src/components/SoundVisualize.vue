@@ -1,10 +1,16 @@
 <template>
-    <div>
-        <canvas id="waveform" width="20" height="100" class="canvas" justify="center"></canvas>
-        <v-btn  @click="onClick"></v-btn>
-        <p>タスク：音量バーの色調整</p>
-    </div>
-    
+    <v-container>
+        <v-row justify="center" align-content="center">
+            <v-col cols=1>
+                <v-row>
+                    <canvas id="waveform" width="20" height="100" class="canvas"/>  
+                </v-row>
+                <v-row>
+                    <v-btn v-on:click="onClick">button</v-btn>
+                </v-row>
+            </v-col>
+        </v-row>  
+    </v-container>
 </template>
 
 <script lang="ts">
@@ -29,16 +35,18 @@
         canvasCtx: CanvasRenderingContext2D | null = null;
         frameCount = 0; 
         isEnable = false;   
-        red = 0.6;
-        orange = 0.4;
+        red = 0.9;
+        amber = 0.7;
+        minDecibels = -80;
+        maxDecibels = -20;
 
         mounted(){
           this.getMicStream();
           this.visualize();
         }
         async getMicStream(){
-            this.analyser.minDecibels = -80;
-            this.analyser.maxDecibels = 0;
+            this.analyser.minDecibels = this.minDecibels;
+            this.analyser.maxDecibels = this.maxDecibels;
             this.analyser.smoothingTimeConstant = 0.9;
             const audioCtx = this.audioCtx;
             const analyser = this.analyser;
@@ -89,7 +97,6 @@
             this.canvasCtx = this.canvas.getContext('2d');
             const WIDTH = this.canvas.width;
             const HEIGHT = this.canvas.height;
-           
 
             if (!(this.canvasCtx instanceof CanvasRenderingContext2D)) {
                 throw new Error("#canvasCtx is not an CanvasRenderingContext2D");
@@ -98,8 +105,12 @@
             this.analyser.fftSize = 32;
             const bufferLengthAlt = this.analyser.frequencyBinCount;
             const dataArrayAlt = new Uint8Array(bufferLengthAlt);
-
-            this.canvasCtx.fillStyle = 'rgb(0, 0, 0)';
+ 
+            const bgGradient = this.canvasCtx.createLinearGradient(0,0,WIDTH,HEIGHT);
+            bgGradient.addColorStop(0.0 , "#660000");
+            bgGradient.addColorStop(0.3 , "#665f24");
+            bgGradient.addColorStop(1.0 , "#00662a");
+            this.canvasCtx.fillStyle = bgGradient;
             this.canvasCtx.fillRect(0, 0, WIDTH, HEIGHT);
             this.analyser.getByteFrequencyData(dataArrayAlt);
             const lowest = 0.01;
@@ -109,19 +120,13 @@
             }
             //const normalized = (Math.log(lowest) - Math.log(max)) / Math.log(lowest);
             const percent = Math.min(Math.max(max, 0), 1);
-                          
-            this.canvasCtx.fillStyle ='rgb(0,150,0)';
-            this.canvasCtx.fillRect(0,HEIGHT - HEIGHT * percent, WIDTH, HEIGHT * percent);
             
-            if(percent > this.orange){
-                this.canvasCtx.fillStyle ='rgb(160,100,0)';
-                this.canvasCtx.fillRect(0,HEIGHT - HEIGHT * percent, WIDTH, HEIGHT * (percent - this.orange)); 
-            }
-
-            if(percent > this.red){
-                this.canvasCtx.fillStyle ='rgb(160,0,0)';
-                this.canvasCtx.fillRect(0,HEIGHT - HEIGHT * percent, WIDTH, HEIGHT * (percent - this.red));
-            }
+            const barGradient = this.canvasCtx.createLinearGradient(0,0,WIDTH,HEIGHT);
+            barGradient.addColorStop(0.0 , "#D50000");
+            barGradient.addColorStop(0.3 , "#FFEE58");
+            barGradient.addColorStop(1.0 , "#00C853");
+            this.canvasCtx.fillStyle = barGradient;
+            this.canvasCtx.fillRect(0,HEIGHT - HEIGHT * percent, WIDTH, HEIGHT * percent);
         }
     }
 </script>

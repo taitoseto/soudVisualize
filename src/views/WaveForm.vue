@@ -1,10 +1,10 @@
 <template>
     <v-app>
-        <v-content>
+        <v-container>
         <div class="WaveForm">
             <SoundVisualize>SoundVisualize</SoundVisualize>           
         </div>
-        </v-content>
+        </v-container>
     </v-app>
 </template>
 
