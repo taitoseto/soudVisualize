@@ -1,16 +1,20 @@
 <template>
-    <div class="WaveForm">
-        <MyCanvas>MyCanvas</MyCanvas>
-    </div>
+    <v-app>
+        <v-content>
+        <div class="WaveForm">
+            <SoundVisualize>SoundVisualize</SoundVisualize>           
+        </div>
+        </v-content>
+    </v-app>
 </template>
 
 <script lang="ts">
     import { Component, Vue } from 'vue-property-decorator';
-    import MyCanvas from "@/components/MyCanvas.vue";
+    import SoundVisualize from "@/components/SoundVisualize.vue";
 
     @Component({
         components: {
-            MyCanvas,
+            SoundVisualize,
     },
     })
     export default class WaveForm extends Vue {}

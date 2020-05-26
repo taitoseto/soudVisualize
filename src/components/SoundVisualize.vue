@@ -1,12 +1,8 @@
 <template>
     <div>
-        <canvas id="waveform" width="40" height="100" class="canvas"></canvas>
-        <p><button  @click="onClick">MyButton</button></p>
-        <div v-bind:style="{ color: color}">
-             <transition name="color-fade">
-                <i class="fas fa-microphone microphone"></i>
-            </transition>
-        </div>  
+        <canvas id="waveform" width="20" height="100" class="canvas" justify="center"></canvas>
+        <v-btn  @click="onClick"></v-btn>
+        <p>タスク：音量バーの色調整</p>
     </div>
     
 </template>
@@ -25,35 +21,31 @@
     }  
  
     @Component
-    export default class MyCanvas extends Vue {
+    export default class SoundVisualize extends Vue {
         
         audioCtx: AudioContext = new (window.AudioContext || window.webkitAudioContext)();
         analyser: AnalyserNode = this.audioCtx.createAnalyser();
         canvas: HTMLCanvasElement | null = null;
         canvasCtx: CanvasRenderingContext2D | null = null;
-        constraints = {audio: true};
-        frameCount = 0;    
-        color = 'rgb(0, 0, 0)';
-        fontsize = 80;
-    
+        frameCount = 0; 
+        isEnable = false;   
+        red = 0.6;
+        orange = 0.4;
 
         mounted(){
-          // mounted 以降で canvas の DOM にアクセスできる
           this.getMicStream();
           this.visualize();
         }
         async getMicStream(){
-            //this.analyser= this.audioCtx.createAnalyser();
-            this.analyser.minDecibels = -0;
-            this.analyser.maxDecibels = -10;
+            this.analyser.minDecibels = -80;
+            this.analyser.maxDecibels = 0;
             this.analyser.smoothingTimeConstant = 0.9;
             const audioCtx = this.audioCtx;
             const analyser = this.analyser;
             const gainNode = this.audioCtx.createGain();
-            
+            const constraints = {audio: true};
             let stream = null;
-            //TODO: Safari等への対応
-            
+            //navigator.mediaDevices.getUserMedia非対応のブラウザへの対応
             if (navigator.mediaDevices.getUserMedia === undefined) {
                 navigator.mediaDevices.getUserMedia = function(constraints: {audio: boolean}) {
                    
@@ -61,7 +53,6 @@
                     if (!getUserMedia) {
                         return Promise.reject(new Error('getUserMedia is not implemented in this browser'));
                     }
-                    // Otherwise, wrap the call to the old navigator.getUserMedia with a Promise
                     return new Promise((resolve, reject) => {
                         navigator.getUserMedia.call(navigator,  constraints, resolve, reject);    
                     });
@@ -70,11 +61,10 @@
             if (navigator.mediaDevices.getUserMedia) {
                 console.log('getUserMedia supported.');
                 try {
-                  stream = await navigator.mediaDevices.getUserMedia (this.constraints)
+                  stream = await navigator.mediaDevices.getUserMedia (constraints)
                   const source = audioCtx.createMediaStreamSource(stream);
                   source.connect(gainNode);
                   gainNode.connect(analyser);
-                  //analyser.connect(audioCtx.destination);
                 } catch(e) {
                   console.log(e)
                 }
@@ -82,11 +72,17 @@
                 console.log('getUserMedia not supported on your browser!');
             }
         }
+
         async onClick(){
+            this.isEnable = !this.isEnable;
             window.cancelAnimationFrame(this.frameCount);
-            this.visualize();         
+            //テスト用＿一時的に描画を止める
+            if(this.isEnable){
+                this.visualize(); 
+            }
         }
-        //周波数ごとのデータから取得
+
+        //音量バーの描画
         visualize() {
             
             this.canvas = document.getElementById('waveform') as HTMLCanvasElement;
@@ -105,9 +101,6 @@
 
             this.canvasCtx.fillStyle = 'rgb(0, 0, 0)';
             this.canvasCtx.fillRect(0, 0, WIDTH, HEIGHT);
-            if (!(this.canvasCtx instanceof CanvasRenderingContext2D)) {
-                throw new Error("#canvasCtx is not an CanvasRenderingContext2D");
-            }
             this.analyser.getByteFrequencyData(dataArrayAlt);
             const lowest = 0.01;
             let max = lowest;
@@ -117,12 +110,17 @@
             //const normalized = (Math.log(lowest) - Math.log(max)) / Math.log(lowest);
             const percent = Math.min(Math.max(max, 0), 1);
                           
-            this.canvasCtx.fillStyle ='rgb(0,100,0)';
+            this.canvasCtx.fillStyle ='rgb(0,150,0)';
             this.canvasCtx.fillRect(0,HEIGHT - HEIGHT * percent, WIDTH, HEIGHT * percent);
-            const peak = 0.8; 
-            if(percent > peak){
-                this.canvasCtx.fillStyle ='rgb(100,0,0)';
-                this.canvasCtx.fillRect(0,HEIGHT - HEIGHT * percent, WIDTH, HEIGHT * (percent - peak)); 
+            
+            if(percent > this.orange){
+                this.canvasCtx.fillStyle ='rgb(160,100,0)';
+                this.canvasCtx.fillRect(0,HEIGHT - HEIGHT * percent, WIDTH, HEIGHT * (percent - this.orange)); 
+            }
+
+            if(percent > this.red){
+                this.canvasCtx.fillStyle ='rgb(160,0,0)';
+                this.canvasCtx.fillRect(0,HEIGHT - HEIGHT * percent, WIDTH, HEIGHT * (percent - this.red));
             }
         }
     }
@@ -131,18 +129,5 @@
 <style scoped>
 .canvas {
   border: 1px solid #000;
-}
-.microphone {
-    font-size: 80px;
-    
-}
-.color-fade-enter-active {
-  transition: all .3s ease;
-}
-.color-fade-leave-active {
-  transition: all .8s ease;
-}
-.color-fade-enter, .color-fade-leave-to{
-  opacity: 0;
 }
 </style>
