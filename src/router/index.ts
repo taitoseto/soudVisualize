@@ -14,6 +14,11 @@ Vue.use(VueRouter)
     path: '/Waveform',
     name: 'Waveform',
     component: () => import(/* webpackChunkName: "about" */ '../views/Waveform.vue')
+  },
+  {
+    path: '/MicCheck',
+    name: 'MicCheck',
+    component: () => import('@/views/MicCheck.vue')
   }
 ]
 

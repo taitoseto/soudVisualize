@@ -1,11 +1,7 @@
 <template>
-    <v-app>
-        <v-container>
-        <div class="WaveForm">
-            <SoundVisualize>SoundVisualize</SoundVisualize>           
-        </div>
-        </v-container>
-    </v-app>
+    <v-container> 
+        <sound-visualize>SoundVisualize</sound-visualize>  
+    </v-container>
 </template>
 
 <script lang="ts">
@@ -15,7 +11,7 @@
     @Component({
         components: {
             SoundVisualize,
-    },
+        },
     })
     export default class WaveForm extends Vue {}
 </script>
