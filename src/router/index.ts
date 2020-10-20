@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import VueRouter, { RouteConfig } from 'vue-router'
-import Waveform from '../views/Waveform.vue'
+import Waveform from '../views/WaveForm.vue'
 
 Vue.use(VueRouter)
 
@@ -13,7 +13,7 @@ Vue.use(VueRouter)
   {
     path: '/Waveform',
     name: 'Waveform',
-    component: () => import(/* webpackChunkName: "about" */ '../views/Waveform.vue')
+    component: () => import(/* webpackChunkName: "about" */ '../views/WaveForm.vue')
   },
   {
     path: '/MicCheck',
