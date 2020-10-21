@@ -1,5 +1,5 @@
 <template>
-    <v-container> 
+    <v-container>
         <sound-visualize>SoundVisualize</sound-visualize>  
     </v-container>
 </template>
